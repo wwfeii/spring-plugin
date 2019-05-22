@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContextAware;
 
 import com.alibaba.fastjson.JSON;
 import com.wffly.club.bean.PluginBean;
+import com.wffly.club.bean.PluginConsole;
 import com.wffly.club.bean.PluginStore;
 
 public class DefaultSpringPluginFactory implements ApplicationContextAware,InitializingBean,SpringPluginFactory{
@@ -354,8 +355,18 @@ public class DefaultSpringPluginFactory implements ApplicationContextAware,Initi
 
 	@Override
 	public String getPluginStatus(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		if(!pluginBeans.containsKey(id)) {
+			throw new RuntimeException(String.format("指定插件不存在 id=%s", id));
+		}
+		if(!adviceCache.containsKey(id)) {
+			return "inactive";
+		}
+		Advice advice = adviceCache.get(id);
+		if(advice instanceof PluginConsole) {
+			return ((PluginConsole)advice).getStatus();
+		}else {
+			return "nonsupport";
+		}
 	}
 
 }

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -57,17 +58,13 @@ public class SpringPluginManagerControl extends HttpServlet{
 			disablePlugin(req,resp);
 		}else if("site".equals(action)) {//插件站点
 			openPluginSite(req,resp);
-			
+		}else if("console".equals(action)) {
+			openConsole(req,resp);
 		}
 			
 	}
 	
-	/**
-	 * 打开插件站点
-	 * @param req
-	 * @param resp
-	 */
-	private void openPluginSite(HttpServletRequest req, HttpServletResponse resp) {
+	private void openConsole(HttpServletRequest req, HttpServletResponse resp) {
 		String statusText = pluginFactory.getPluginStatus(req.getParameter("id"));
 		try {
 			req.setAttribute("name", "");
@@ -77,6 +74,30 @@ public class SpringPluginManagerControl extends HttpServlet{
 			e.printStackTrace();
 		}
 		
+	}
+	/**
+	 * 打开插件站点
+	 * @param req
+	 * @param resp
+	 */
+	private void openPluginSite(HttpServletRequest req, HttpServletResponse resp) {
+		try {
+			String url = req.getParameter("url");
+			PluginSite site;
+			if(!StringUtils.isEmpty(url)) {
+				site = getSite(url);
+			}else {
+				site = new PluginSite();
+				site.setPluginBeans(new ArrayList<PluginBean>());
+				site.setName("空站点");
+				url = "empty";
+			}
+			req.setAttribute("site", site);
+			req.setAttribute("siteUrl",url);
+			req.getRequestDispatcher("/pluginSite.jsp").forward(req, resp);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	/**
 	 * 禁用指定插件
